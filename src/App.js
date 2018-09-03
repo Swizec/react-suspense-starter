@@ -15,6 +15,16 @@ const Circle = styled.circle`
     stroke-width: 0.1;
 `;
 
+const P = styled.p`
+    width: 960px;
+`;
+
+const Button = styled.button`
+    margin-top: 200px;
+    margin-bottom: 200px;
+    font-size: 1.5em;
+`;
+
 // React polyfill borrowed from @ryanflorence
 // https://github.com/reach/router/blob/master/src/index.js
 let { unstable_deferredUpdates } = ReactDOM;
@@ -25,7 +35,8 @@ if (unstable_deferredUpdates === undefined) {
 class Dataviz extends React.PureComponent {
     state = {
         data: this.props.data,
-        dataSlice: [0, 0],
+        N: 0,
+        chunkSize: this.props.data.length / 4,
         maxAge: d3.max(this.props.data, d => d.member_birth_year),
         maxDuration: d3.max(this.props.data, d => d.duration_sec)
     };
@@ -39,28 +50,60 @@ class Dataviz extends React.PureComponent {
     }
 
     showMoreData = () => {
-        const { data, dataSlice } = this.state,
-            [_, end] = dataSlice;
+        const { N, chunkSize } = this.state;
 
-        if (end < data.length) {
-            requestAnimationFrame(() =>
-                this.setState({ dataSlice: [0, end + 1000] })
-            );
+        if (N < chunkSize) {
+            requestAnimationFrame(() => this.setState({ N: N + 1000 }));
         }
     };
 
     render() {
-        const { data, dataSlice, maxAge, maxDuration } = this.state,
-            [start, end] = dataSlice;
+        const { data, N, chunkSize, maxAge, maxDuration } = this.state;
 
         return (
             <React.Fragment>
-                <p>Displaying {end} datapoints</p>
-                <svg width={800} height={800}>
+                <p>Displaying {N * 4} datapoints</p>
+                <svg width={800} height={650}>
                     <Scatterplot
                         x={110}
                         y={10}
-                        data={data.slice(start, end)}
+                        data={data.slice(0, N)}
+                        maxX={maxAge}
+                        maxY={maxDuration}
+                        width={600}
+                        height={600}
+                        datapoint={({ x, y, key }) => (
+                            <Circle cx={x} cy={y} r={2} key={key} />
+                        )}
+                    />
+                    <Scatterplot
+                        x={110}
+                        y={10}
+                        data={data.slice(chunkSize, N * 2)}
+                        maxX={maxAge}
+                        maxY={maxDuration}
+                        width={600}
+                        height={600}
+                        datapoint={({ x, y, key }) => (
+                            <Circle cx={x} cy={y} r={2} key={key} />
+                        )}
+                    />
+                    <Scatterplot
+                        x={110}
+                        y={10}
+                        data={data.slice(chunkSize * 2, N * 3)}
+                        maxX={maxAge}
+                        maxY={maxDuration}
+                        width={600}
+                        height={600}
+                        datapoint={({ x, y, key }) => (
+                            <Circle cx={x} cy={y} r={2} key={key} />
+                        )}
+                    />
+                    <Scatterplot
+                        x={110}
+                        y={10}
+                        data={data.slice(chunkSize * 3, N * 4)}
                         maxX={maxAge}
                         maxY={maxDuration}
                         width={600}
@@ -117,13 +160,6 @@ class NotLazyViz extends React.Component {
     }
 }
 
-/* <React.Placeholder
-    delayMs={0}
-    fallback={<div>🌀 Loading like 40 megs of CSV....</div>}
->
-    <LazyViz />
-</React.Placeholder> */
-
 class App extends React.Component {
     constructor() {
         super();
@@ -142,25 +178,47 @@ class App extends React.Component {
         const { showViz } = this.state;
 
         return (
-            <React.Fragment>
+            <React.unstable_AsyncMode>
                 <h1>Suspensful scatterplot with 199,000+ datapoints</h1>
 
-                <p>
+                <P>
                     Try typing in here to see the UI thread doesn't block:{" "}
                     <input type="text" />
-                </p>
+                </P>
+                <P>
+                    This experiment shows all FordBike rides in San Francisco in
+                    2018 comparing ride duration to birth year of the rider.
+                    Correlation is weak.
+                </P>
+                <P>
+                    We use 3 overlapping scatterplots and React's new Time
+                    Slicing feature to progressively show more and more
+                    datapoints the more patience you have as a user. Adding
+                    datapoints gets slower and slower, but never blocks the UI
+                    thread which is nice. The loading state is done with React
+                    Suspense.
+                </P>
 
                 {showViz ? (
                     <React.Placeholder
                         delayMs={500}
-                        fallback={<div>Loading like 40 megs of CSV</div>}
+                        fallback={
+                            <React.Fragment>
+                                <div>🌀 Loading like 40 megs of CSV</div>
+                                <svg width={800} height={650} />
+                            </React.Fragment>
+                        }
                     >
                         <LazyViz />
                     </React.Placeholder>
                 ) : (
-                    <button onClick={this.showViz}>Click Me For Magic</button>
+                    <Button onClick={this.showViz}>Click Me For Magic</Button>
                 )}
-            </React.Fragment>
+                <P>
+                    Experiment built by{" "}
+                    <a href="https://twitter.com/swizec">Swizec</a>.
+                </P>
+            </React.unstable_AsyncMode>
         );
     }
 }
