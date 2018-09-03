@@ -1,24 +1,26 @@
 {
-  "name": "react-suspense-starter",
-  "version": "1.0.0",
-  "main": "index.js",
-  "license": "MIT",
-  "dependencies": {
-    "babel-preset-env": "^1.7.0",
-    "babel-preset-react": "^6.24.1",
-    "babel-preset-stage-0": "^6.24.1",
-    "cross-env": "^5.2.0",
-    "d3": "^5.7.0",
-    "parcel": "^1.9.7",
-    "parcel-bundler": "^1.9.7",
-    "react-hot-loader": "^4.3.4",
-    "simple-cache-provider": "^0.7.0"
-  },
-  "alias": {
-    "react": "./vendor/react.development.js",
-    "react-dom": "./vendor/react-dom.development.js"
-  },
-  "scripts": {
-    "start": "cross-env NODE_ENV=development parcel src/index.html"
-  }
+    "name": "react-suspense-starter",
+    "version": "1.0.0",
+    "main": "index.js",
+    "license": "MIT",
+    "dependencies": {
+        "babel-plugin-transform-class-properties": "^6.24.1",
+        "babel-preset-env": "^1.7.0",
+        "babel-preset-react": "^6.24.1",
+        "babel-preset-stage-0": "^6.24.1",
+        "cross-env": "^5.2.0",
+        "d3": "^5.7.0",
+        "parcel": "^1.9.7",
+        "parcel-bundler": "^1.9.7",
+        "react-hot-loader": "^4.3.4",
+        "simple-cache-provider": "^0.7.0"
+    },
+    "alias": {
+        "react": "./vendor/react.development.js",
+        "react-dom": "./vendor/react-dom.development.js"
+    },
+    "scripts": {
+        "start": "cross-env NODE_ENV=development parcel src/index.html",
+        "build": "cross-env NODE_ENV=production parcel src/index.html"
+    }
 }

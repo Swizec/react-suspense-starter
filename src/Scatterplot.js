@@ -10,25 +10,21 @@ class Scatterplot extends React.PureComponent {
         this.state = {
             xScale: d3
                 .scaleLinear()
-                .domain([0, 1])
+                .domain([1900, props.maxX])
                 .range([0, props.width]),
             yScale: d3
                 .scaleLinear()
                 .domain([0, 1])
-                .range([0, props.height])
+                .range([0, props.maxY]),
+            length: props.data.length
         };
     }
 
     static getDerivedStateFromProps(props, state) {
         let { xScale, yScale } = state;
 
-        xScale
-            .domain([1900, d3.max(props.data, d => d.member_birth_year)])
-
-            .range([0, props.width]);
-        yScale
-            .domain([0, d3.max(props.data, d => d.duration_sec)])
-            .range([props.height, 0]);
+        xScale.domain([1900, props.maxX]).range([0, props.width]);
+        yScale.domain([0, props.maxY]).range([props.height, 0]);
 
         return { ...state, xScale, yScale };
     }
@@ -39,10 +35,11 @@ class Scatterplot extends React.PureComponent {
 
         return (
             <g transform={`translate(${x}, ${y})`}>
-                {data.map(({ member_birth_year, duration_sec }) =>
+                {data.map(({ member_birth_year, duration_sec }, i) =>
                     datapoint({
                         x: xScale(member_birth_year),
-                        y: yScale(duration_sec)
+                        y: yScale(duration_sec),
+                        key: i
                     })
                 )}
                 <Axis
